@@ -1,9 +1,9 @@
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QTimer
-from pypond.PondFile import PondDoc, PondRender
-from pypond.PondCommand import PondHeader, PondPaper
+from PyQt5.QtCore import QObject, pyqtSlot, QTimer
+
+from back_end.pond_request import get_score
 from backend.pypond_extensions import LilypondScripts
-from back_end.pond_request import get_score, get_actor
-from os import path
+from pypond.PondCommand import PondHeader
+from pypond.PondFile import PondDoc, PondRender
 
 
 class APIReader(QObject):
@@ -14,12 +14,12 @@ class APIReader(QObject):
         self.render = PondRender()
         self.pond_doc = PondDoc()
         self.advance_bar = False
-        self.timer = QTimer(parent=self)
         self.measure_number = 0
         self.command = 'mirar al frente'
         self.beat_duration = beat_duration
         self.api_url = url
         self.instrument = 'flute'
+        self.stage = '0-0'
 
         self.init_doc()
 
@@ -34,24 +34,38 @@ class APIReader(QObject):
     def begin(self):
         self.timer.start()
 
+    @pyqtSlot(str)
+    def set_instrument(self, instrument):
+        self.instrument = instrument
+
     def measure_duration(self, beat_number):
         return self.beat_duration * beat_number
 
-    def render_image(self, render=True):
-        response = get_score('flute')
-        data = response.json()
-        score = data['score_data']
-        duration = data['duration']
+    @pyqtSlot()
+    def render_image(self):
+        if self.instrument == 'actor':
+            response = get_score(self.instrument)
+            data = response.json()
+            action = data['action']
+            stage = data['stage']
+            new_stage = False
+            if stage != self.stage:
+                self.stage = stage
+                new_stage = True
+            time = 4
+            self.signal_update_command(action, stage, new_stage)
 
-        if render:
-            time = duration
-            self.timer.setInterval(self.measure_duration(time))
-            print(f"Rendering measure {self.measure_number}\n"
-                  f"    Volume: {self.composer.volume}\n"
-                  f"    Stage: {self.composer.stage}-{self.composer.direction}")
+        else:
+            response = get_score(self.instrument)
+            data = response.json()
+            score = data['score_data']
+            duration = data['duration']
+
+            time = self.measure_duration(duration)
             self.measure_number += 1
             self.pond_doc.score = score
             self.render.update(self.pond_doc.create_file())
             self.render.write()
             self.render.render()
             self.signal_file_completed.emit(time)
+        QTimer.singleShot(time, self.render_image)
