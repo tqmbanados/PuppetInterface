@@ -1,11 +1,11 @@
+import sys
+
 from PyQt5.QtWidgets import QApplication
 
+import parameters as p
 from back_end.APIReader import APIReader
 from front_end.PyPondWindow import PyPondWindow
-import sys
-import parameters as p
-from private_parameters import channel_name, url
-
+from private_parameters import url
 
 if __name__ == "__main__":
     def hook(type_, value, traceback):
