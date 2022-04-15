@@ -16,10 +16,8 @@ if __name__ == "__main__":
     window = PyPondWindow(BEAT_DURATION_MS, SCORE_IMAGE_PATH)
     render = APIReader(BEAT_DURATION_MS, url)
 
-    window.signal_get_next.connect(render.render_image)
-    window.signal_write_score.connect(render.write_score)
-    window.signal_update_value.connect(render.update_values)
-    render.file_completed.connect(window.update_label)
+    window.signal_send_type.connect(render.set_instrument)
+    render.signal_file_completed.connect()
 
     window.show()
     sys.exit(app.exec())

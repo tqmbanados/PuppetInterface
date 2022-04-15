@@ -7,7 +7,8 @@ from pypond.PondFile import PondDoc, PondRender
 
 
 class APIReader(QObject):
-    signal_file_completed = pyqtSlot()
+    signal_file_completed = pyqtSlot(int)
+    signal_update_command = pyqtSlot(str, str, bool)
 
     def __init__(self, beat_duration, url="localhost"):
         super().__init__()
@@ -15,6 +16,7 @@ class APIReader(QObject):
         self.pond_doc = PondDoc()
         self.advance_bar = False
         self.measure_number = 0
+        self.timer = QTimer()
         self.command = 'mirar al frente'
         self.beat_duration = beat_duration
         self.api_url = url
@@ -53,7 +55,7 @@ class APIReader(QObject):
                 self.stage = stage
                 new_stage = True
             time = 4
-            self.signal_update_command(action, stage, new_stage)
+            self.signal_update_command.emit(action, stage, new_stage)
 
         else:
             response = get_score(self.instrument)

@@ -1,6 +1,6 @@
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSizePolicy)
+from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSizePolicy, QPushButton)
 
 from front_end.QPondWidgets import Metronome, ScoreLabel
 from parameters import WINDOW_GEOMETRY
@@ -8,22 +8,75 @@ from os import path
 
 
 class PyPondWindow(QLabel):
+    string_converter = {'Marioneta': 'actor',
+                        'Flauta': 'flute',
+                        'Oboe': 'oboe',
+                        'Clarinete': 'clarinet'}
+    signal_send_type = pyqtSignal(str)
+    signal_render = pyqtSignal()
 
     def __init__(self, beat_duration, image_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.path = path.join(*image_path)
         self.beat_duration = beat_duration
+        self.setGeometry(100, 150, 300, 300)
+        self.buttons = {}
+        self.window = None
+
+        self.init_gui()
+
+    def init_gui(self):
+        v_box = QVBoxLayout()
+        for name in ['Marioneta', 'Flauta', 'Oboe', 'Clarinete']:
+            new_button = QPushButton(name, parent=self)
+            new_button.clicked.connect(self.create_puppet_slot(name))
+            v_box.addWidget(new_button)
+            v_box.addStretch()
+            self.buttons[name] = new_button
+
+        hbox_main = QHBoxLayout()
+        hbox_main.addLayout(v_box)
+        self.setLayout(hbox_main)
+
+    def create_puppet_slot(self, text):
+        def temp_slot():
+            selected = self.string_converter[text]
+            if selected == 'actor':
+                self.open_actor()
+            else:
+                self.open_instrument(selected)
+        return temp_slot
+
+    def open_actor(self):
+        self.window = ActorWindow(self.signal_render)
+        self.window.show()
+        self.hide()
+
+    def open_instrument(self, instrument):
+        self.window = InstrumentWindow(self.beat_duration, self.path, self.signal_render)
+        self.signal_send_type.emit(instrument)
+        self.window.show()
+        self.hide()
+
+    @pyqtSlot(str)
+    def file_completed(self, measure_duration):
+        pass
+
+    @pyqtSlot(str, str, bool)
+    def update_command(self, action, stage, new_stage):
+        pass
 
 
 class InstrumentWindow(QWidget):
 
-    def __init__(self, beat_duration, image_path):
+    def __init__(self, beat_duration, image_path, signal_render):
         super().__init__()
         self.setGeometry(*WINDOW_GEOMETRY)
         self.metronome = Metronome(beat_duration, parent=self)
         self.__current = 0
         self.score_labels = {}
         self.image_path = image_path
+        self.signal_render = signal_render
 
         self.init_gui()
 
@@ -62,20 +115,19 @@ class InstrumentWindow(QWidget):
 
 
 class ActorWindow(QWidget):
-    signal_get_next = pyqtSignal(bool)
-    signal_write_score = pyqtSignal()
-    signal_update_value = pyqtSignal(dict)
 
-    def __init__(self):
+    def __init__(self, signal_render):
         super().__init__()
         self.acting_label = QLabel("", self)
         self.setGeometry(*WINDOW_GEOMETRY)
+        self.signal_render = signal_render
+
         self.init_gui()
 
     def init_gui(self):
         font = QFont()
         font.setPointSize(40)
-        self.acting.setFont(font)
+        self.acting_label.setFont(font)
         self.setStyleSheet("background-color: white")
 
     @pyqtSlot(str, str, bool)
