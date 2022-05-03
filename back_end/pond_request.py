@@ -1,6 +1,6 @@
 import requests
 
-from private_parameters import url
+from param import url
 
 
 def put_score(score_string, score_type, duration=6):

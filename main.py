@@ -17,7 +17,7 @@ if __name__ == "__main__":
     render = APIReader(BEAT_DURATION_MS, url)
 
     window.signal_send_type.connect(render.set_instrument)
-    render.signal_file_completed.connect()
+    render.signal_file_completed.connect(window.file_completed)
 
     window.show()
     sys.exit(app.exec())

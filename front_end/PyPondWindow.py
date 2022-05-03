@@ -3,7 +3,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSizePolicy, QPushButton)
 
 from front_end.QPondWidgets import Metronome, ScoreLabel
-from parameters import WINDOW_GEOMETRY
+from param import WINDOW_GEOMETRY, SCORE_IMAGE_PATH
 from os import path
 
 
@@ -58,9 +58,9 @@ class PyPondWindow(QLabel):
         self.window.show()
         self.hide()
 
-    @pyqtSlot(str)
+    @pyqtSlot(int)
     def file_completed(self, measure_duration):
-        pass
+        self.signal_render.emit()
 
     @pyqtSlot(str, str, bool)
     def update_command(self, action, stage, new_stage):
@@ -76,7 +76,7 @@ class InstrumentWindow(QWidget):
         self.__current = 0
         self.score_labels = {}
         self.image_path = image_path
-        self.signal_render = signal_render
+        signal_render.connect(self.update_label)
 
         self.init_gui()
 

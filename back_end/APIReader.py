@@ -1,14 +1,14 @@
-from PyQt5.QtCore import QObject, pyqtSlot, QTimer
+from PyQt5.QtCore import QObject, pyqtSlot, QTimer, pyqtSignal
 
 from back_end.pond_request import get_score
-from backend.pypond_extensions import LilypondScripts
+from back_end.pypond_extensions import LilypondScripts
 from pypond.PondCommand import PondHeader
 from pypond.PondFile import PondDoc, PondRender
 
 
 class APIReader(QObject):
-    signal_file_completed = pyqtSlot(int)
-    signal_update_command = pyqtSlot(str, str, bool)
+    signal_file_completed = pyqtSignal(int)
+    signal_update_command = pyqtSignal(str, str, bool)
 
     def __init__(self, beat_duration, url="localhost"):
         super().__init__()
