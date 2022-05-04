@@ -56,9 +56,9 @@ class PyPondWindow(QLabel):
         self.hide()
 
     def open_instrument(self, instrument):
-        self.window = InstrumentWindow(self.beat_duration, self.path, self.signal_render)
+        self.window = InstrumentWindow(self.path, self.signal_start)
+        self.signal_render.connect(self.window.update_label)
         self.signal_send_type.emit(instrument)
-        self.signal_start.emit()
         self.window.show()
         self.hide()
 
@@ -73,13 +73,14 @@ class PyPondWindow(QLabel):
 
 class InstrumentWindow(QWidget):
 
-    def __init__(self, beat_duration, image_path, signal_render):
+    def __init__(self, image_path, signal_start):
         super().__init__()
         self.setGeometry(*WINDOW_GEOMETRY)
         self.__current = 0
         self.score_labels = {}
         self.image_path = image_path
-        signal_render.connect(self.update_label)
+        self.signal_start = signal_start
+        self.buttons = {}
 
         self.init_gui()
 
@@ -95,9 +96,21 @@ class InstrumentWindow(QWidget):
             score_box.addStretch()
             self.score_labels[i] = new_label
 
+        new_button = QPushButton('Empezar', parent=self)
+        new_button.clicked.connect(self.start)
+        self.buttons['start'] = new_button
+        vbox_button = QVBoxLayout()
+        vbox_button.addWidget(new_button)
+
         main_hbox = QHBoxLayout()
         main_hbox.addLayout(score_box)
+        main_hbox.addLayout(vbox_button)
         self.setLayout(main_hbox)
+
+    @pyqtSlot()
+    def start(self):
+        self.signal_start.emit()
+        self.buttons['start'].hide()
 
     def get_current_label(self):
         current = self.__current

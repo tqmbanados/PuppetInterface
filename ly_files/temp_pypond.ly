@@ -26,5 +26,5 @@ glissOff = {\revert NoteColumn.glissando-skip
 }
 {
 \time 8/4
-r4 \tuplet 3/2 4 {r8 dis''8\ff ( f''8\< dis''8 f''8 fis''8 gis''8 f''8 fis''8)} gis''4\fff\glissando\glissOn  \hide NoteHead  \once\omit Accidental \glissOff fis''4 \undo \hide NoteHead r2\!
+gis'16\ff ( b'16\< gis'16 a'16 b'16 cis''16 f''16 dis''16 f''16 fis''16 f''16 fis''16) gis''4\fff\glissando\glissOn  \hide NoteHead  \once\omit Accidental \glissOff fis''4 \undo \hide NoteHead r2\! r4
 }>>}
