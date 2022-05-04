@@ -35,8 +35,7 @@ class APIReader(QObject):
 
     @pyqtSlot()
     def begin(self):
-        time = self.measure_duration(6)
-        QTimer.singleShot(time, self.render_image)
+        self.render_image()
 
     @pyqtSlot(str)
     def set_instrument(self, instrument):
@@ -49,7 +48,7 @@ class APIReader(QObject):
     def render_image(self):
         print("STARTED")
         if self.instrument == 'actor':
-            response = get_score(self.instrument)
+            response = get_score(self.instrument, self.measure_number)
             if not response.status_code == 200:
                 print(f"ERROR: {response.status_code}, {response.text}")
                 return
@@ -82,6 +81,7 @@ class APIReader(QObject):
             self.render.render()
             self.signal_file_completed.emit()
         QTimer.singleShot(time, self.render_image)
+        self.measure_number += 1
 
     @classmethod
     def create_score(cls, line, beats):

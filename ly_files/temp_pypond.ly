@@ -25,6 +25,6 @@ glissOff = {\revert NoteColumn.glissando-skip
 \omit TimeSignature
 }
 {
-\time 8/4
-gis'16\ff ( b'16\< gis'16 a'16 b'16 cis''16 f''16 dis''16 f''16 fis''16 f''16 fis''16) gis''4\fff\glissando\glissOn  \hide NoteHead  \once\omit Accidental \glissOff fis''4 \undo \hide NoteHead r2\! r4
+\time 6/4
+r4 \tuplet 5/4 4 {r16 b16\p ( d'16\< b16 c'16 d'16 e'16 gis'16 e'16 fis'16 gis'16 a'16 fis'16 gis'16\> a'16 b'16 cis''16 a'16 b'16 cis''16 dis''16 f''16 fis''16 dis''16 cis''16\!)}
 }>>}
