@@ -47,6 +47,9 @@ class APIReader(QObject):
     def render_image(self):
         if self.instrument == 'actor':
             response = get_score(self.instrument)
+            if not response.status_code == 200:
+                print(f"ERROR: {response.status_code}, {response.text}")
+                return
             data = response.json()
             action = data['action']
             stage = data['stage']
@@ -59,6 +62,9 @@ class APIReader(QObject):
 
         else:
             response = get_score(self.instrument)
+            if not response.status_code == 200:
+                print(f"ERROR: {response.status_code}, {response.text}")
+                return
             data = response.json()
             score = data['score_data']
             duration = data['duration']
