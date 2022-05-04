@@ -28,7 +28,7 @@ def get_score(score_type):
         extension = "instrument"
         data = {'instrument': score_type}
     try:
-        response = requests.get(url + extension, data=data)
+        response = requests.get(url + extension, params=data)
     except requests.exceptions as exception:
         print(exception)
         return

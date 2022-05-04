@@ -1,0 +1,2 @@
+@image{temp_pypond-1}
+@c eof

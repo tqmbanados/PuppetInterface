@@ -4,10 +4,11 @@ from back_end.pond_request import get_score
 from back_end.pypond_extensions import LilypondScripts
 from pypond.PondCommand import PondHeader
 from pypond.PondFile import PondDoc, PondRender
+from pypond.PondScore import PondScore, PondStaff, PondTimeSignature
 
 
 class APIReader(QObject):
-    signal_file_completed = pyqtSignal(int)
+    signal_file_completed = pyqtSignal()
     signal_update_command = pyqtSignal(str, str, bool)
 
     def __init__(self, beat_duration, url="localhost"):
@@ -34,7 +35,8 @@ class APIReader(QObject):
 
     @pyqtSlot()
     def begin(self):
-        self.timer.start()
+        time = self.measure_duration(6)
+        QTimer.singleShot(time, self.render_image)
 
     @pyqtSlot(str)
     def set_instrument(self, instrument):
@@ -45,6 +47,7 @@ class APIReader(QObject):
 
     @pyqtSlot()
     def render_image(self):
+        print("STARTED")
         if self.instrument == 'actor':
             response = get_score(self.instrument)
             if not response.status_code == 200:
@@ -57,17 +60,19 @@ class APIReader(QObject):
             if stage != self.stage:
                 self.stage = stage
                 new_stage = True
-            time = 4
+            time = 5
             self.signal_update_command.emit(action, stage, new_stage)
 
         else:
+            print(self.instrument)
             response = get_score(self.instrument)
             if not response.status_code == 200:
                 print(f"ERROR: {response.status_code}, {response.text}")
                 return
             data = response.json()
-            score = data['score_data']
+            line = data['score_data']
             duration = data['duration']
+            score = self.create_score(line, duration)
 
             time = self.measure_duration(duration)
             self.measure_number += 1
@@ -75,5 +80,17 @@ class APIReader(QObject):
             self.render.update(self.pond_doc.create_file())
             self.render.write()
             self.render.render()
-            self.signal_file_completed.emit(time)
+            self.signal_file_completed.emit()
         QTimer.singleShot(time, self.render_image)
+
+    @classmethod
+    def create_score(cls, line, beats):
+        time_signature_initializers = [beats, 4]
+        score = PondScore()
+        staff = PondStaff()
+        time_signature = PondTimeSignature(*time_signature_initializers)
+        staff.time_signature = time_signature
+        staff.add_voice(line)
+        staff.add_with_command("omit", "TimeSignature")
+        score.add_staff(staff)
+        return score
