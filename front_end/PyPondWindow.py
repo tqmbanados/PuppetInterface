@@ -28,6 +28,7 @@ class PyPondWindow(QLabel):
         self.init_gui()
 
     def init_gui(self):
+        self.setWindowTitle('Menú')
         v_box = QVBoxLayout()
         for name in ['Marioneta', 'Flauta', 'Oboe', 'Clarinete']:
             new_button = QPushButton(name, parent=self)
@@ -56,7 +57,7 @@ class PyPondWindow(QLabel):
         self.hide()
 
     def open_instrument(self, instrument):
-        self.window = InstrumentWindow(self.path, self.signal_start)
+        self.window = InstrumentWindow(instrument, self.path, self.signal_start)
         self.signal_render.connect(self.window.update_label)
         self.signal_send_type.emit(instrument)
         self.window.show()
@@ -73,11 +74,12 @@ class PyPondWindow(QLabel):
 
 class InstrumentWindow(QWidget):
 
-    def __init__(self, image_path, signal_start):
+    def __init__(self, instrument, image_path, signal_start):
         super().__init__()
         self.setGeometry(*WINDOW_GEOMETRY)
         self.__current = 0
         self.score_labels = {}
+        self.instrument = instrument
         self.image_path = image_path
         self.signal_start = signal_start
         self.buttons = {}
@@ -85,6 +87,7 @@ class InstrumentWindow(QWidget):
         self.init_gui()
 
     def init_gui(self):
+        self.setWindowTitle(f'Marioneta - {self.instrument}')
         self.setStyleSheet("background-color: white")
         score_box = QVBoxLayout()
         for i in range(4):
@@ -142,6 +145,7 @@ class ActorWindow(QWidget):
         self.init_gui()
 
     def init_gui(self):
+        self.setWindowTitle('Marioneta')
         font = QFont()
         font.setPointSize(40)
         self.acting_label.setFont(font)

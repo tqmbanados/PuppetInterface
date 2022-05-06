@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 pypond
 ly_files
+*/ly_files

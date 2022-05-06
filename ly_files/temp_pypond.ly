@@ -26,5 +26,5 @@ glissOff = {\revert NoteColumn.glissando-skip
 }
 {
 \time 6/4
-r4 \tuplet 5/4 4 {r16 b16\p ( d'16\< b16 c'16 d'16 e'16 gis'16 e'16 fis'16 gis'16 a'16 fis'16 gis'16\> a'16 b'16 cis''16 a'16 b'16 cis''16 dis''16 f''16 fis''16 dis''16 cis''16\!)}
+r4 \tuplet 6/4 4 {r16 c'16\mp ( d'16\< e'16 d'16 e'16 fis'16 gis'16 a'16 b'16 gis'16 a'16 gis'16\> fis'16 e'16 fis'16 gis'16 a'16 b'16 cis''16 a'16 b'16 cis''16 a'16\!)} r4\! \stopTrillSpan
 }>>}
