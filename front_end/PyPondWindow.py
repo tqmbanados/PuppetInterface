@@ -19,7 +19,7 @@ class PyPondWindow(QLabel):
 
     def __init__(self, beat_duration, image_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.path = path.join(*image_path)
+        self.path = image_path
         self.beat_duration = beat_duration
         self.setGeometry(100, 150, 300, 300)
         self.buttons = {}
