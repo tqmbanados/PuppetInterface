@@ -52,10 +52,10 @@ def put_actor(actor_string, stage, action_number):
     return response
 
 
-def get_actor():
+def get_actor(action_number):
     extension = 'actor'
     try:
-        response = requests.get(url + extension)
+        response = requests.get(url + extension, params={'number': action_number})
     except requests.exceptions as exception:
         print(exception)
         return

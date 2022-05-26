@@ -1,6 +1,7 @@
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSizePolicy, QPushButton)
+from PyQt5.QtMultimedia import QSound
 
 from front_end.QPondWidgets import ScoreLabel
 from param import WINDOW_GEOMETRY
@@ -17,9 +18,10 @@ class PyPondWindow(QLabel):
     signal_start = pyqtSignal()
     signal_update = pyqtSignal(str, str, bool)
 
-    def __init__(self, beat_duration, image_path, *args, **kwargs):
+    def __init__(self, beat_duration, image_path, audio_path, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.path = image_path
+        self.image_path = image_path
+        self.audio_path = audio_path
         self.beat_duration = beat_duration
         self.setGeometry(100, 150, 300, 300)
         self.buttons = {}
@@ -51,13 +53,14 @@ class PyPondWindow(QLabel):
         return temp_slot
 
     def open_actor(self):
-        self.window = ActorWindow(self.signal_update)
-        self.signal_start.emit()
+        self.window = ActorWindow(self.signal_start, self.audio_path)
+        self.signal_update.connect(self.window.update_label)
+        self.signal_send_type.emit('actor')
         self.window.show()
         self.hide()
 
     def open_instrument(self, instrument):
-        self.window = InstrumentWindow(instrument, self.path, self.signal_start)
+        self.window = InstrumentWindow(instrument, self.image_path, self.signal_start)
         self.signal_render.connect(self.window.update_label)
         self.signal_send_type.emit(instrument)
         self.window.show()
@@ -136,21 +139,59 @@ class InstrumentWindow(QWidget):
 
 class ActorWindow(QWidget):
 
-    def __init__(self, signal_render):
+    def __init__(self, signal_start, audio_path):
         super().__init__()
-        self.acting_label = QLabel("", self)
+        self.acting_label = QLabel("inerte", self)
+        self.stage_label = QLabel("0", self)
+        self.boton_empezar = QPushButton('Empezar', self)
         self.setGeometry(*WINDOW_GEOMETRY)
-        signal_render.connect(self.update_label)
+        self.audio_path = audio_path
+        self.signal_start = signal_start
 
         self.init_gui()
 
     def init_gui(self):
         self.setWindowTitle('Marioneta')
-        font = QFont()
-        font.setPointSize(40)
-        self.acting_label.setFont(font)
         self.setStyleSheet("background-color: white")
+
+        font = QFont()
+        font.setPointSize(100)
+        self.acting_label.setFont(font)
+        new_font = QFont()
+        new_font.setPointSize(40)
+        self.stage_label.setFont(new_font)
+        self.boton_empezar.clicked.connect(self.start)
+
+        vbox = QVBoxLayout()
+        vbox.addStretch()
+        vbox.addWidget(self.acting_label)
+        vbox.addStretch()
+        vbox.addWidget(self.stage_label)
+        vbox.addStretch()
+        vbox.addWidget(self.boton_empezar)
+        vbox.addStretch()
+        hbox = QHBoxLayout()
+        hbox.addStretch()
+        hbox.addLayout(vbox)
+        hbox.addStretch()
+        self.setLayout(hbox)
+
+    @pyqtSlot()
+    def start(self):
+        self.signal_start.emit()
+        self.boton_empezar.hide()
 
     @pyqtSlot(str, str, bool)
     def update_label(self, action, stage, change_stage):
         self.acting_label.setText(action)
+        self.stage_label.setText(stage)
+        if change_stage:
+            self.play_audio(stage)
+        self.play_audio(action)
+
+    def play_audio(self, audio_name):
+        audio_path = path.join(self.audio_path, audio_name + '.wav')
+        try:
+            QSound.play(audio_path)
+        except FileNotFoundError as error:
+            print(error)

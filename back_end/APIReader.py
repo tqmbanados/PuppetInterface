@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSlot, QTimer, pyqtSignal
 
-from back_end.pond_request import get_score
+from back_end.pond_request import get_score, get_actor
 from back_end.pypond_extensions import LilypondScripts
 from pypond.PondCommand import PondHeader
 from pypond.PondFile import PondDoc, PondRender
@@ -17,6 +17,7 @@ class APIReader(QObject):
         self.pond_doc = PondDoc()
         self.advance_bar = False
         self.measure_number = 0
+        self.action_number = 0
         self.timer = QTimer()
         self.command = 'mirar al frente'
         self.beat_duration = beat_duration
@@ -48,8 +49,8 @@ class APIReader(QObject):
     def render_image(self):
         print("STARTED")
         if self.instrument == 'actor':
-            response = get_score(self.instrument, self.measure_number)
-            if not response.status_code == 200:
+            response = get_actor(self.action_number)
+            if response.status_code not in (200, 206):
                 print(f"ERROR: {response.status_code}, {response.text}")
                 return
             data = response.json()
@@ -59,13 +60,13 @@ class APIReader(QObject):
             if stage != self.stage:
                 self.stage = stage
                 new_stage = True
-            time = 5
+            time = self.measure_duration(5)
             self.signal_update_command.emit(action, stage, new_stage)
-
+            self.action_number += 1
         else:
             print(self.instrument)
             response = get_score(self.instrument)
-            if not response.status_code == 200:
+            if response.status_code not in (200, 206):
                 print(f"ERROR: {response.status_code}, {response.text}")
                 return
             data = response.json()
@@ -81,7 +82,6 @@ class APIReader(QObject):
             self.render.render()
             self.signal_file_completed.emit()
         QTimer.singleShot(time, self.render_image)
-        self.measure_number += 1
 
     @classmethod
     def create_score(cls, line, beats):
