@@ -130,3 +130,4 @@ dmypy.json
 pypond
 ly_files
 */ly_files
+*.wav
